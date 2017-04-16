@@ -46,7 +46,6 @@
             return {
                 init: function (url) {
                     socket = io(url);
-                    console.log('connected!')
                 },
                 on: function (eventName,callback){
                     socket.on(eventName,function(){
