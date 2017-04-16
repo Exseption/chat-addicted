@@ -15,10 +15,20 @@ function handler (req, res) {
             res.end(data);
         });
 }
+var another = io.of('/another');
+another.on('connection', function (socket) {
+    console.log('Кто-то подключился к другому каналу!');
+    socket.send('Пдключился к другой комнате!')
+})
+
 io.on('connection', function (socket) {
+    console.log('Кто-то подключился к основному каналу!')
+    socket.on('message', function (data) {
+        console.log(data);
+    });
     socket.on('mess', function (data) {
         console.log("Сообщение от "+ data.nick + " " + data.data);
-        socket.send(data);
+        socket.json.send({nick: 'Вы', data: data.data});
         socket.broadcast.emit('s:mess', {data: data.data, nick: data.nick})
 
     })
