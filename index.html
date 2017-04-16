@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="test">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+</head>
+<body>
+<chat></chat>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    angular.module('test', [])
+        .directive('chat', function () {
+            return {
+                controller: function ($scope, socket) {
+                    $scope.messages = [];
+                    $scope.announces = [];
+                    socket.on('s:mess', function (data) {
+                        $scope.messages.push(data)
+                    });
+                    socket.on('message',function (data) {
+                        if(data.type == 'announce'){
+                            $scope.announces.push(data)
+                        }
+                        $scope.messages.push(data);
+                    });
+
+                    $scope.test = function (nick, mess) {
+                        socket.emit('mess', { nick: nick, data: mess });
+                        $scope.i_message = '';
+                    }
+                },
+                templateUrl: 'chat.html',
+                link: function (scope, elem, attrs) {
+                    angular.element(document.querySelector('#mbody'))
+                }
+            }
+        })
+        .factory('socket',function ($rootScope){
+            var socket = io('http://localhost:8000');
+            return {
+                on: function (eventName,callback){
+                    socket.on(eventName,function(){
+                        var args = [].slice.call(arguments);
+                        $rootScope.$apply(function(){
+                            if(callback){
+                                callback.apply(socket,args);
+                            }
+                        });
+                    });
+                },
+                emit: function (eventName, data, callback){
+                    var args = [].slice.call(arguments), cb;
+                    if( typeof args[args.length-1]  == "function" ){
+                        cb = args[args.length-1];
+                        args[args.length-1] = function(){
+                            var args = [].slice.call(arguments);
+                            $rootScope.$apply(function(){
+                                if(cb){
+                                    cb.apply(socket,args);
+                                }
+                            });
+                        };
+                    }
+                    socket.emit.apply(socket, args);
+                }
+            };
+        })
+</script>
+<script type="text/ng-template" id="chat.html">
+    <h3>Addicted!</h3>
+    <hr/>
+    <form name="f">
+        <label>Ваш ник: </label><input ng-model="nick" required>
+        <label>Сообщение: </label><input ng-model="i_message" required id="mbody">
+        <input type="submit" ng-click="test(nick, i_message)" value="Отправить!" ng-disabled="f.$invalid"/>
+    </form>
+    <hr/>
+    <div ng-repeat="m in messages">
+        <div><b>Пользователь</b> {{m.nick}} <b>написал:</b> {{m.data}}</div>
+        <div ng-repeat="a in announces">
+            <div>{{a.data}}</div>
+        </div>
+    </div>
+</script>
+</body>
+</html>
