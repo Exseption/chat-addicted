@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bower": "^1.8.0",
+    "redis-server": "^1.1.0",
     "socket.io": "^1.7.3"
   }
 }
