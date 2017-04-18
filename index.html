@@ -38,6 +38,15 @@
                         socket.emit('hello', { nick: nick })
                     };
                     socket.init('http://192.168.88.13:8000');
+
+                    socket.on('server:stored-messages',function (data) {
+                        console.log(data);
+                        for(var i =0; i < data.listof.length; i++){
+                            $scope.messages.push(data.listof[i])
+                        }
+
+                    });
+
                     $scope.users = undefined;
                     socket.on('hello:error', function (data) {
                         alert(data.data);

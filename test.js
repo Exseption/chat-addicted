@@ -1,32 +1,28 @@
-var    redis = require('redis')
-    ,    client = redis.createClient()
-;
-// отлавливаем ошибки
-client.on("error", function (err) {
-    console.log("Error: " + err);
-});
+// var redisClient = require('redis-connection')();
+//
+// var arr = [1,8,88];
+// var multi = redisClient.multi()
+// for (var i=0; i<arr.length; i++) {
+//     multi.rpush('testlist', arr[i]);
+// }
+//
+// multi.exec(function(errors, results) {
+//     console.log(results)
+// });
 
-// Попробуем записать и прочитать
-client.set('myKey', 'Hello Redis', function (err, repl) {
-    if (err) {
-        // Оо что то случилось при записи
-        console.log('Что то случилось при записи: ' + err);
-        client.quit();
-    } else {
-        // Прочтем записанное
-        client.get('myKey', function (err, repl) {
-            //Закрываем соединение, так как нам оно больше не нужно
-            client.quit();
-            if (err) {
-                console.log('Что то случилось при чтении: ' + err);
-            } else if (repl) {
-                // Ключ найден
-                console.log('Ключ: ' + repl);
-            } else {
-                // Ключ ненайден
-                console.log('Ключ ненайден.')
-
-            };
-        });
-    };
+var redis = require('redis');
+var client = redis.createClient();
+client.on('connect', function() {
+    console.log('connected');
 });
+client.rpush('test', 324, function(err, reply) {
+    console.log(reply); //prints 2
+});
+client.lrange('test', 0, -1, function(err, reply) {
+    console.log(reply); // ['angularjs', 'backbone']
+});
+//
+// redisClient.set('hello', 'world');
+// redisClient.get('hello', function (err, reply) {
+//     console.log('hello', reply.toString()); // hello world
+// });
