@@ -43,13 +43,18 @@ io.on('connection', function (socket) {
         }
     });
     socket.on('mess', function (data) {
-
         console.log('Обычное сообщение!' + data.data);
         var pic = data.data.substring(data.data.length - 3);
+        redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
+            console.log(reply)
+        });
+
         if((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
             console.log('Опа, картинка!');
             var img = data.data;
-            data.data = "<img src='" + img + "'/></img>";
+
+
+            data.data = "<img src='" + img + "' class='img-responsive' alt='Responsive image'/></img>";
             redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
                 console.log(reply)
             });
