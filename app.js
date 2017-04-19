@@ -1,6 +1,7 @@
-var app = require('http').createServer(handler)
+var app = require('http').createServer(handler);
 var io = require('socket.io')(app);
 var fs = require('fs');
+var redis = require('redis').createClient();
 app.listen(8000);
 function handler (req, res) {
     fs.readFile(__dirname + '/index.html',
@@ -9,15 +10,6 @@ function handler (req, res) {
             res.end(data);
         });
 }
-
-var red = require('redis');
-var redis = red.createClient();
-
-var another = io.of('/another');
-another.on('connection', function (socket) {
-    console.log('Кто-то подключился к другому каналу!');
-    socket.send('Пдключился к другой комнате!')
-});
 var users = [];
 io.on('connection', function (socket) {
     console.log('Кто-то подключился к основному каналу! ' + socket.id);
@@ -37,34 +29,34 @@ io.on('connection', function (socket) {
                 }
                 socket.json.emit('server:stored-messages', {listof: _arr});
             });
-
-
             socket.broadcast.emit('server:hello', {users: users})
         }
     });
     socket.on('mess', function (data) {
-        console.log('Обычное сообщение!' + data.data);
-        var pic = data.data.substring(data.data.length - 3);
-        redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
-            console.log(reply)
-        });
-
-        if((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
-            console.log('Опа, картинка!');
-            var img = data.data;
-
-
-            data.data = "<img src='" + img + "' class='img-responsive' alt='Responsive image'/></img>";
-            redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
+        const store = function () {
+            return redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
                 console.log(reply)
             });
-        } else if(data.data.indexOf('http') === 0){
+        };
+        var pic = data.data.substring(data.data.length - 3);
+        if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
+            console.log('Опа, картинка!');
+            var img = data.data;
+            data.data = "<img src='" + img + "' class='img-responsive' alt='Responsive image'/></img>";
+            store();
+        } else if (data.data.indexOf('www.youtube.com/watch') > -1) {
+            console.log('Наверно, ютюб!');
+            var video = data.data.replace("watch?v=", "/embed/");
+            data.data = "<iframe width='660' height='415' src='" + video + "' frameborder='0' allowfullscreen></iframe>";
+            store();
+        } else if (data.data.indexOf('http') === 0) {
             console.log('Ссылка!');
             var link = data.data;
             data.data = "<a href='" + link + "'/>" + link +"</a>";
-            redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
-                console.log(reply)
-            });
+            store();
+        } else {
+            console.log('Обычное сообщение!' + data.data);
+            store()
         }
         socket.json.send({ nick: 'Вы', data: data.data });
         socket.broadcast.emit('s:mess', {data: data.data, nick: data.nick})

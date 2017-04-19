@@ -140,14 +140,15 @@
         <div class="container-fluid">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">
-                        <!--<img alt="Brand" src="...">-->
-                        Chat addicted!
-                    </a>
+                    <div class="navbar-brand" href="#">
+                        <img alt="Brand" src="https://cdn0.iconfinder.com/data/icons/pokemon-go-vol-2/135/_pikachu-32.png" style="    margin-top: -5px;"></div>
+
+                    </div>
+
                     <form class="navbar-form navbar-left" name="FormReg">
                         <div class="form-group">
                             <input ng-model="nick" ng-disabled="entered" class="form-control" placeholder="Ваш ник" required>
-                            <button ng-click="enterToChat(nick)" ng-disabled="entered || FormReg.$invalid" class="btn btn-primary">Войти</button>
+                            <button ng-click="enterToChat(nick)" ng-disabled="entered || FormReg.$invalid" class="btn btn-danger">Войти</button>
                         </div>
                     </form>
                 </div>
@@ -175,8 +176,8 @@
                             <span class="link-this">
                             {{m.nick}}
                         </span>  <b>написал:</b>
-                            <span ng-bind-html="m.data | unsafe">
-                        </span>
+                            <div ng-bind-html="m.data | unsafe">
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -185,7 +186,7 @@
                 <form name="f" class="form-inline">
                     <div class="form-group">
                         <input ng-model="i_message" required id="mbody" size="100" class="form-control" placeholder="Сообщение">
-                        <input type="submit" ng-click="send(i_message)" value="Отправить!" ng-disabled="f.$invalid || !entered" class="btn btn-default"/>
+                        <input type="submit" ng-click="send(i_message)" value="Отправить!" ng-disabled="f.$invalid || !entered" class="btn btn-primary"/>
                     </div>
                 </form>
             </div>
