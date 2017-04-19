@@ -32,6 +32,11 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('server:hello', {users: users})
         }
     });
+
+    socket.on('keying', function (data) {
+        socket.broadcast.emit('server:keying', {nick: data.nick, action: 'чё-то набирает...'})
+    });
+
     socket.on('mess', function (data) {
         const store = function () {
             return redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
@@ -40,22 +45,22 @@ io.on('connection', function (socket) {
         };
         var pic = data.data.substring(data.data.length - 3);
         if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
-            console.log('Опа, картинка!');
+            console.log('Опа, картинка! ' + data.data);
             var img = data.data;
             data.data = "<img src='" + img + "' class='img-responsive' alt='Responsive image'/></img>";
             store();
         } else if (data.data.indexOf('www.youtube.com/watch') > -1) {
-            console.log('Наверно, ютюб!');
+            console.log('Наверно, ютюб! ' + data.data);
             var video = data.data.replace("watch?v=", "/embed/");
             data.data = "<iframe width='660' height='415' src='" + video + "' frameborder='0' allowfullscreen></iframe>";
             store();
         } else if (data.data.indexOf('http') === 0) {
-            console.log('Ссылка!');
+            console.log('Ссылка! ' + data.data);
             var link = data.data;
             data.data = "<a href='" + link + "'/>" + link +"</a>";
             store();
         } else {
-            console.log('Обычное сообщение!' + data.data);
+            console.log('Обычное сообщение! ' + data.data);
             store()
         }
         socket.json.send({ nick: 'Вы', data: data.data });
