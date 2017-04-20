@@ -46,7 +46,13 @@
                 })
         })
 
-        .directive('chat', function (socket, $sce, $timeout, $cookies, $window) {
+        .service('Session', function ($interval) {
+            $interval(function(){
+                console.log('Test!')
+            },50000)
+        })
+
+        .directive('chat', function (socket, $sce, $timeout, $cookies, $window, Session) {
             return {
                 transclude: true,
                 templateUrl: 'chat.html',
@@ -79,9 +85,11 @@
                         console.log('Ники '+ myNick + ' ' + data.user)
                         const by = data.by
                        if(myNick === data.user){
-                         angular.element(document.querySelector('#faggot')).append("<h1>"+ by +" сказал, что ты - пидор!</h1>");
+                         angular.element(document.querySelector('#faggot')).append("<h1>"+ by +" пнул тебя с чата!</h1>");
                          $timeout(function () {
                              angular.element(document.querySelector('#faggot')).html('');
+                             $window.location.reload();
+                             $cookies.remove('user');
                          }, 2000);
 
 
@@ -247,7 +255,7 @@
             <span ng-if="!entered">Войди в чат, чтобы увидеть кто там есть</span>
             <span ng-if="entered">Сейчас в чате:</span>
             <span ng-if="entered" ng-repeat="user in users">{{user | fuckNick}}
-                <img src="https://cdn2.iconfinder.com/data/icons/special-waving-flags/512/LGBT-32.png" ng-click="attack(user)" ng-show="_myNick !== user"><span ng-if="!$last">,</span>
+                <img src="https://cdn1.iconfinder.com/data/icons/pictograms-glyphs-12/48/593-32.png" ng-click="attack(user)" ng-show="_myNick !== user" style="cursor:pointer;"><span ng-if="!$last">,</span>
             <span ng-if="$last">.</span>
         </span>
         </div>
