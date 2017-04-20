@@ -11,8 +11,10 @@ function handler (req, res) {
         });
 }
 var users = [];
+
 io.on('connection', function (socket) {
-    console.log('Кто-то подключился к основному каналу! ' + socket.id);
+
+    console.log('Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
     socket.on('hello', function (data) {
         socket.name = data.nick;
         if(users.indexOf(socket.name) > -1) {
