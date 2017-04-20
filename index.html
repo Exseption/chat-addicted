@@ -34,8 +34,7 @@
             $urlRouterProvider.otherwise('/index');
             $stateProvider
                 .state('index', {
-                    url: '/index',
-                    template: '<h2>Тут че-то есть</h2>'
+                    url: '/index'
                 })
                 .state('room', {
                     url: '/room/:id',
@@ -60,6 +59,7 @@
                             $cookies.put('user', nick);
                         }
                         myNick = nick;
+                        scope._myNick = myNick;
                         scope.entered = true;
                         socket.emit('hello', { nick: nick })
                     };
@@ -68,6 +68,25 @@
                         scope.enterToChat(user, null);
 
                     }
+
+
+                    scope.attack = function (user) {
+                      socket.emit('attack', {user: user, by: myNick})
+                    };
+
+                    socket.on('server:attack', function (data) {
+
+                        console.log('Ники '+ myNick + ' ' + data.user)
+                        const by = data.by
+                       if(myNick === data.user){
+                         angular.element(document.querySelector('#faggot')).append("<h1>"+ by +" сказал, что ты - пидор!</h1>");
+                         $timeout(function () {
+                             angular.element(document.querySelector('#faggot')).html('');
+                         }, 2000);
+
+
+                       }
+                    });
 
 
                     scope.forgiveMe = function () {
@@ -150,7 +169,7 @@
             return $sce.trustAsHtml; })
         .filter('fuckNick', function () {
             return function (nick) {
-                return nick.substring(0,10) + '...';
+                return nick.substring(0,10);
             }
         })
         .factory('socket',function ($rootScope){
@@ -189,13 +208,13 @@
 </script>
 <script type="text/ng-template" id="log.html">
 <div class="container">
-<h5>Date:   Sun Apr 16 23:29:17 2017 +0900</h5>
+<h5>Date:   Sun Apr 16 23:29:17 2017</h5>
 <p>initial commit</p>
-<h5>Date:   Tue Apr 18 17:59:19 2017 +0900</h5>
+<h5>Date:   Tue Apr 18 17:59:19 2017</h5>
 <p>Redis added</p>
-<h5>Date:   Tue Apr 18 19:21:54 2017 +0900</h5>
+<h5>Date:   Tue Apr 18 19:21:54 2017</h5>
 <p>стили, фиксы</p>
-<h5>Date:   Thu Apr 20 00:44:53 2017 +0900</h5>
+<h5>Date:   Thu Apr 20 00:44:53 2017</h5>
 <p>куки, промотка</p>
 </div>
 </script>
@@ -224,10 +243,11 @@
         </div>
     </nav>
     <div class="container">
-        <div>
+        <div style="margin-bottom: 5px">
             <span ng-if="!entered">Войди в чат, чтобы увидеть кто там есть</span>
             <span ng-if="entered">Сейчас в чате:</span>
-            <span ng-if="entered" ng-repeat="user in users">{{user | fuckNick}}<span ng-if="!$last">,</span>
+            <span ng-if="entered" ng-repeat="user in users">{{user | fuckNick}}
+                <img src="https://cdn2.iconfinder.com/data/icons/special-waving-flags/512/LGBT-32.png" ng-click="attack(user)" ng-show="_myNick !== user"><span ng-if="!$last">,</span>
             <span ng-if="$last">.</span>
         </span>
         </div>
@@ -240,7 +260,7 @@
                             <b>{{m.date}} </b>
                         </span>
                             <b>Пользователь</b>
-                            <span class="link-this" ui-sref="room({id: m.nick})">
+                            <span class="link-this" ng-click="attack(m.nick)">
                             {{m.nick}}
                             </span>
                             <b>написал:</b>
@@ -252,6 +272,7 @@
             </div>
             <div style="margin-left: 30px">
                 <div style="min-height: 2em"><i>{{keying}}</i></div>
+                <div id="faggot"></div>
                 <form name="f" class="form-inline">
                     <div class="form-group">
                         <input ng-model="i_message" required id="message_body" size="100" class="form-control" placeholder="Сообщение">

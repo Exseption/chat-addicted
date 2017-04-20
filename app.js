@@ -13,7 +13,6 @@ function handler (req, res) {
 var users = [];
 
 io.on('connection', function (socket) {
-
     console.log('Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
     socket.on('hello', function (data) {
         socket.name = data.nick;
@@ -34,6 +33,13 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('server:hello', {users: users})
         }
     });
+
+    socket.on('attack', function(data){
+        console.log('Кто-то кого-то пидаром обозвал! ' + data.user);
+        socket.broadcast.emit('server:attack', {user: data.user, by: data.by});
+        socket.emit('server:attack', {user: data.user, by: data.by});
+    });
+
 
     socket.on('keying', function (data) {
         socket.broadcast.emit('server:keying', {nick: data.nick, action: 'чё-то набирает...'})
