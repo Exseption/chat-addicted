@@ -14,6 +14,20 @@ var users = [];
 
 io.on('connection', function (socket) {
     console.log('Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
+
+
+    socket.on('hello:back', function () {
+        console.log('Back received!');
+        redis.lrange('addicted', 0, -1, function (err, reply) {
+            console.log(reply);
+            var _arr = [];
+            for(var i = 0; i < reply.length; i++){
+                _arr.push(JSON.parse(reply[i]));
+            }
+            socket.json.emit('server:back', { listof: _arr});
+        });
+    });
+
     socket.on('hello', function (data) {
         socket.name = data.nick;
         if(users.indexOf(socket.name) > -1) {
@@ -22,7 +36,7 @@ io.on('connection', function (socket) {
             console.log('Подцепился юзер с ником ' + socket.name);
             users.push(data.nick);
             socket.json.emit('server:hello', {users: users});
-            redis.lrange('addicted',0,-1,function (err, reply) {
+            redis.lrange('addicted', -10,-1,function (err, reply) {
                 console.log(reply);
                 var _arr = [];
                 for(var i = 0; i < reply.length; i++){
@@ -45,8 +59,26 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('server:keying', {nick: data.nick, action: 'чё-то набирает...'})
     });
 
+    socket.on('vote:post',function (data) {
+        console.log(data.item);
+        redis.lindex('addicted', data.index, function (err, reply) {
+            console.log('lindex', reply);
+            var voteForThis = JSON.parse(reply);
+            if (typeof(voteForThis.mark) === 'undefined'){
+                voteForThis.mark = 0;
+            }
+            voteForThis.mark++;
+            redis.lset('addicted', data.index, JSON.stringify(voteForThis), function (err,reply) {
+                socket.emit('server:voted', {index: data.index});
+                socket.broadcast.emit('server:voted', {index: data.index});
+            })
+        });
+
+    });
+
     socket.on('mess', function (data) {
         const store = function () {
+            data.mark = 0;
             return redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
                 console.log(reply)
             });
