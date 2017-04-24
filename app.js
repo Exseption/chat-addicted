@@ -15,7 +15,6 @@ var users = [];
 io.on('connection', function (socket) {
     console.log('Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
 
-
     socket.on('hello:back', function () {
         console.log('Back received!');
         redis.lrange('addicted', 0, -1, function (err, reply) {
@@ -28,15 +27,32 @@ io.on('connection', function (socket) {
         });
     });
 
+
+
     socket.on('hello', function (data) {
         socket.name = data.nick;
         if(users.indexOf(socket.name) > -1) {
             socket.emit('hello:error', {data: 'Такой ник уже занят'})
         } else {
+            redis.lrange('nicks',0, -1, function (err, reply) {
+                var _arr = [];
+                for(var i = 0; i < reply.length; i++){
+                    _arr.push(reply[i]);
+                }
+                if (_arr.indexOf(data.nick) === -1){
+                    redis.rpush('nicks', data.nick, function (err, reply) {
+                        console.log('Добавлен новый ник в базу! ' + data.nick)
+                        _arr.push(data.nick);
+                    });
+                }
+
+                socket.broadcast.emit('server:nicks', {nicks: _arr});
+                socket.emit('server:nicks', {nicks: _arr});
+            });
             console.log('Подцепился юзер с ником ' + socket.name);
             users.push(data.nick);
             socket.json.emit('server:hello', {users: users});
-            redis.lrange('addicted', -10,-1,function (err, reply) {
+            redis.lrange('addicted', -10, -1, function (err, reply) {
                 console.log(reply);
                 var _arr = [];
                 for(var i = 0; i < reply.length; i++){
