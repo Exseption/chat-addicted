@@ -92,6 +92,22 @@ io.on('connection', function (socket) {
 
     });
 
+    socket.on('remove_post', function (data) {
+        console.log('Кто-то хочет удалить пост! ' + data.post + "c индексом " + data.index);
+        var obj = {
+            nick: data.nick,
+            data: data.data,
+            mark: data.mark
+        };
+        console.log(JSON.stringify(obj));
+        redis.lrem('addicted', 0, JSON.stringify(obj), function (err, reply) {
+            console.log(reply);
+
+            socket.broadcast.emit('server:remove_post', {index: data.index});
+            socket.emit('server:remove_post', {index: data.index});
+        })
+    });
+
     socket.on('mess', function (data) {
         const store = function () {
             data.mark = 0;
@@ -103,7 +119,7 @@ io.on('connection', function (socket) {
         if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
             console.log('Опа, картинка! ' + data.data);
             var img = data.data;
-            data.data = "<img src='" + img + "' class='img-responsive' alt='Responsive image'/></img>";
+            data.data = "<img src='" + img + "' class='img-responsive'/></img>";
             store();
         } else if (data.data.indexOf('www.youtube.com/watch') > -1) {
             console.log('Наверно, ютюб! ' + data.data);
@@ -119,8 +135,8 @@ io.on('connection', function (socket) {
             console.log('Обычное сообщение! ' + data.data);
             store()
         }
-        socket.json.send({ nick: 'Вы', data: data.data });
-        socket.broadcast.emit('s:mess', {data: data.data, nick: data.nick})
+        socket.json.send({ nick: 'Вы', data: data.data, date: data.date });
+        socket.broadcast.emit('s:mess', {data: data.data, nick: data.nick, date: data.date})
     }
 );
     
