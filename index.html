@@ -361,6 +361,7 @@
         <!--</div>-->
     </div>
 </div>
+
 <main>
     <div class="container">
         <div style="margin-bottom: 5px">
@@ -377,7 +378,7 @@
                     <div><a ng-click="back()" style="cursor: pointer; text-decoration: none" ng-if="entered" ng-hide="backed">Загрузить предыдущие</a> </div>
                     <div ng-repeat="m in messages"  class="z-depth-1" style="background-color: white ">
                         <div>
-                            <div class="indigo lighten-5" style="padding: 5px 8px">
+                            <div class=" grey lighten-2" style="padding: 5px 8px">
                                 <span><b>{{m.date}} </b></span><b>Пользователь </b><span class="link-this" ng-click="attack(m.nick)">{{m.nick}}</span><b> написал:</b>
                             </div>
                             <div style="padding: 10px 15px; margin: 10px; ">
@@ -409,7 +410,6 @@
                 </form>
             </div>
         </div>
-
     </div>
     <div class="container" style="margin-top: 10px" ng-show="entered">
         <!--<a ui-sref="log" style="cursor: pointer; text-transform: uppercase">Лог</a>-->
@@ -470,21 +470,10 @@
 </script>
 <script>
     $(document).ready(function(){
-        // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
         $('#modal1').modal();
-//        $('#close_modal').modal('close');
 
-
-
-//        $('.materialboxed')
-//            .materialbox();
+        $('.parallax').parallax();
     });
-
-
-    $(document).ready(function(){
-        $('.materialboxed').materialbox();
-    });
-
 
 </script>
 

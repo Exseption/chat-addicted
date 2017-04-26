@@ -13,12 +13,12 @@ function handler (req, res) {
 var users = [];
 
 io.on('connection', function (socket) {
-    console.log('Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
+    console.log(new Date() + ' Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
 
     socket.on('hello:back', function () {
-        console.log('Back received!');
+        console.log(new Date() + ' Back sended!');
         redis.lrange('addicted', 0, -1, function (err, reply) {
-            console.log(reply);
+            //console.log(reply);
             var _arr = [];
             for(var i = 0; i < reply.length; i++){
                 _arr.push(JSON.parse(reply[i]));
@@ -41,7 +41,7 @@ io.on('connection', function (socket) {
                 }
                 if (_arr.indexOf(data.nick) === -1){
                     redis.rpush('nicks', data.nick, function (err, reply) {
-                        console.log('Добавлен новый ник в базу! ' + data.nick)
+                        console.log(new Date() + ' Добавлен новый ник в базу! ' + data.nick)
                         _arr.push(data.nick);
                     });
                 }
@@ -49,11 +49,11 @@ io.on('connection', function (socket) {
                 socket.broadcast.emit('server:nicks', {nicks: _arr});
                 socket.emit('server:nicks', {nicks: _arr});
             });
-            console.log('Подцепился юзер с ником ' + socket.name);
+            console.log(new Date() + ' Подцепился юзер с ником ' + socket.name);
             users.push(data.nick);
             socket.json.emit('server:hello', {users: users});
             redis.lrange('addicted', -10, -1, function (err, reply) {
-                console.log(reply);
+                //console.log(reply);
                 var _arr = [];
                 for(var i = 0; i < reply.length; i++){
                     _arr.push(JSON.parse(reply[i]));
@@ -65,7 +65,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('attack', function(data){
-        console.log('Кто-то кого-то пидаром обозвал! ' + data.user);
+        console.log(new Date() + ' Кто-то кого-то пнул с чата! ' + data.user);
         socket.broadcast.emit('server:attack', {user: data.user, by: data.by});
         socket.emit('server:attack', {user: data.user, by: data.by});
     });
@@ -76,9 +76,9 @@ io.on('connection', function (socket) {
     });
 
     socket.on('vote:post',function (data) {
-        console.log(data.item);
+        console.log(new Date() + ' ' + data.item);
         redis.lindex('addicted', data.index, function (err, reply) {
-            console.log('lindex', reply);
+            //console.log('lindex', reply);
             var voteForThis = JSON.parse(reply);
             if (typeof(voteForThis.mark) === 'undefined'){
                 voteForThis.mark = 0;
@@ -93,7 +93,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('remove_post', function (data) {
-        console.log('Кто-то хочет удалить пост! ' + data.post + "c индексом " + data.index);
+        console.log(new Date() + ' Кто-то хочет удалить пост! ' + data.post + "c индексом " + data.index);
         var obj = {
             nick: data.nick,
             data: data.data,
@@ -101,7 +101,7 @@ io.on('connection', function (socket) {
         };
         console.log(JSON.stringify(obj));
         redis.lrem('addicted', 0, JSON.stringify(obj), function (err, reply) {
-            console.log(reply);
+            //console.log(reply);
 
             socket.broadcast.emit('server:remove_post', {index: data.index});
             socket.emit('server:remove_post', {index: data.index});
@@ -112,19 +112,19 @@ io.on('connection', function (socket) {
         const store = function () {
             data.mark = 0;
             return redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
-                console.log(reply)
+                //console.log(reply)
             });
         };
         var pic = data.data.substring(data.data.length - 3);
         if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
-            console.log('Опа, картинка! ' + data.data);
+            console.log(new Date() + ' Опа, картинка! ' + data.data);
             var img = data.data;
             data.data = "<img src='" + img + "' class='img-responsive'/></img>";
             store();
         } else if (data.data.indexOf('www.youtube.com/watch') > -1) {
             console.log('Наверно, ютюб! ' + data.data);
             var video = data.data.replace("watch?v=", "/embed/");
-            data.data = "<iframe width='660' height='415' src='" + video + "' frameborder='0' allowfullscreen></iframe>";
+            data.data = "<div class='video-container'><iframe width='660' height='415' src='" + video + "' frameborder='0' allowfullscreen></iframe></div> ";
             store();
         } else if (data.data.indexOf('http') === 0) {
             console.log('Ссылка! ' + data.data);
@@ -132,7 +132,7 @@ io.on('connection', function (socket) {
             data.data = "<a href='" + link + "'/>" + link +"</a>";
             store();
         } else {
-            console.log('Обычное сообщение! ' + data.data);
+            console.log(new Date() + ' Обычное сообщение! ' + data.data);
             store()
         }
         socket.json.send({ nick: 'Вы', data: data.data, date: data.date });
@@ -141,7 +141,7 @@ io.on('connection', function (socket) {
 );
     
     socket.on('disconnect', function () {
-        console.log('Отвалился '+ socket.name);
+        console.log(new Date() + ' Отвалился '+ socket.name);
         var index = users.indexOf(socket.name);
         if(index > -1){
             users.splice(index,1);
