@@ -96,6 +96,12 @@
                 transclude: true,
                 templateUrl: 'chat.html',
                 link: function (scope, elem, attrs) {
+
+                    $('input#i_message').characterCounter();
+                    $('#modal1').modal();
+                    $('.scrollspy').scrollSpy();
+                    $('.materialboxed').materialbox();
+
                     var myNick = undefined;
                     scope.entered = false;
                     socket.init('http://192.168.88.13:8000'); //init url
@@ -327,17 +333,6 @@
         </ul>
         <nav>
             <div class="nav-wrapper indigo">
-
-                    <a href="#" class="brand-logo center">
-                        <img alt="Brand" src="https://cdn0.iconfinder.com/data/icons/pokemon-go-vol-2/135/_pikachu-32.png" style="margin-top: -5px;">
-                        Chat addicted!
-                    </a>
-                    <ul class="right hide-on-med-and-down">
-
-
-                        <!--<li><a class="dropdown-button" href="#!" data-activates="dropdown1">Меню<i class="material-icons right">arrow_drop_down</i></a></li>-->
-                    </ul>
-
             </div>
         </nav>
     </div>
@@ -435,12 +430,19 @@
         </div>
     </div>
     </div>
-
 </main>
 <ul id="slide-out" class="side-nav fixed z-depth-1">
-    <li ng-show="entered" style="min-height: 64px" class="valign-wrapper indigo">
+        <li style="min-height: 64px" class="indigo">
+            <a href="#" class="brand-logo valign-wrapper" style="font-size: xx-large; color: white">
+                <!--<img alt="Brand" src="https://cdn0.iconfinder.com/data/icons/pokemon-go-vol-2/135/_pikachu-32.png" style="margin-top: -5px;">-->
+                Chat addicted!
+            </a>
 
-        <a ><span class="name white-text">{{_myNick | limitTo: 30}}</span></a>
+        </li>
+
+    <li ng-show="entered">
+
+        <a ><span class="name">{{_myNick | limitTo: 30}}</span></a>
 
     </li>
     <li ng-show="!entered"><a href="#modal1"><i class="material-icons">perm_identity</i>Войти в чат!</a></li>
@@ -478,11 +480,6 @@
 </div>
 </script>
 <script>
-    $(document).ready(function(){
-        $('#modal1').modal();
-        $('input#i_message').characterCounter();
-        $('.scrollspy').scrollSpy();
-    });
 </script>
 </body>
 </html>

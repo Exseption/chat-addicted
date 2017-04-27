@@ -2,6 +2,8 @@ const app = require('http').createServer(handler);
 const io = require('socket.io')(app);
 const fs = require('fs');
 const redis = require('redis').createClient();
+
+
 app.listen(8000);
 function handler (req, res) {
     fs.readFile(__dirname + '/index.html',
@@ -117,7 +119,7 @@ io.on('connection', function (socket) {
             });
         };
         let pic = data.data.substring(data.data.length - 3);
-        if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif')) {
+        if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif') || (pic === 'peg')) {
             console.log(new Date() + ' Опа, картинка! ' + data.data);
             let img = data.data;
             data.data = "<img src='" + img + "' class='img-responsive'/></img>";

@@ -1,5 +1,5 @@
 # chat-addicted
-simple chat on nodejs, socket.io and bootstrap
+simple chat on nodejs, socket.io and materializecss
 
 #install:
 1. npm i
