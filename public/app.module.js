@@ -1,4 +1,4 @@
-angular.module('addicted', ['ngSanitize', 'ngCookies', 'ui.router', 'ngFileUpload'])
+angular.module('addicted', ['ngSanitize', 'ngCookies', 'ui.router', 'ngFileUpload', 'ngAnimate'])
     .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/index');
         $stateProvider

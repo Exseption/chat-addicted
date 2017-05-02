@@ -11,6 +11,11 @@ body {
 main {
     flex: 1 0 auto;
 }
+.fix_icons_align {
+    vertical-align: middle;
+    padding-bottom: 3px;
+}
+
 .img-responsive {
     max-width: 90%;
 }
@@ -21,4 +26,18 @@ header, main, footer {
     header, main, footer {
         padding-left: 0;
     }
+}
+.animate-repeat.ng-leave {
+    transition:all linear 0.5s;
+}
+.animate-repeat.ng-leave.ng-leave-active {
+    opacity:0;
+    max-height:0;
+}
+
+.animate-repeat.ng-leave,
+.animate-repeat.ng-move.ng-move-active,
+.animate-repeat.ng-enter.ng-enter-active {
+    opacity:1;
+    max-height:30px;
 }

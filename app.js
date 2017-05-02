@@ -1,21 +1,60 @@
-const app = require('http').createServer(handler);
-const io = require('socket.io')(app);
 const fs = require('fs');
 const redis = require('redis').createClient();
-
-
-app.listen(8000);
-function handler (req, res) {
-    fs.readFile(__dirname + '/index.html',
-        function (err, data) {
-            res.writeHead(200);
-            res.end(data);
-        });
+const express = require('express'),
+    path = require('path'),
+    bodyParser = require('body-parser'),
+    methodOverride = require('method-override');
+const multer = require('multer');
+const storage = multer.diskStorage({ //multers disk storage settings
+    destination: function (req, file, cb) {
+        cb(null, './uploads/')
+    },
+    filename: function (req, file, cb) {
+        let datetimestamp = Date.now();
+        cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+    }
+});
+const upload = multer({ //multer settings
+        storage: storage
+        }).single('file');
+app = express();
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser({uploadDir: './uploads'}));
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.disable('x-powered-by');
+app.use(function(req, res, next) {
+    const err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+});
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.send(err);
+    });
 }
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.send(err);
+});
+const server = app.listen(8000);
+app.post('/upload', function(req, res) {
+    upload(req,res,function(err){
+        if(err){
+            res.json({error_code:1,err_desc:err});
+            return;
+        }
+        res.json({error_code:0,err_desc:null});
+    })
+});
+const io = require('socket.io')(server);
 let users = [];
-
 io.on('connection', function (socket) {
-    console.log(new Date() + ' Кто-то подключился к основному каналу! ' + socket.id + ' ' + socket.rooms);
+    let addr = socket.handshake.address;
+    console.log(new Date() + ' Кто-то подключился к основному каналу! ' + addr.substring(addr.length - 13));
+
 
     socket.on('hello:back', function () {
         console.log(new Date() + ' Back sended!');
@@ -28,9 +67,6 @@ io.on('connection', function (socket) {
             socket.json.emit('server:back', { listof: _arr});
         });
     });
-
-
-
     socket.on('hello', function (data) {
         socket.name = data.nick;
         if(users.indexOf(socket.name) > -1) {
@@ -47,7 +83,6 @@ io.on('connection', function (socket) {
                         _arr.push(data.nick);
                     });
                 }
-
                 socket.broadcast.emit('server:nicks', {nicks: _arr});
                 socket.emit('server:nicks', {nicks: _arr});
             });
@@ -65,18 +100,14 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('server:hello', {users: users})
         }
     });
-
     socket.on('attack', function(data){
         console.log(new Date() + ' Кто-то кого-то пнул с чата! ' + data.user);
         socket.broadcast.emit('server:attack', {user: data.user, by: data.by});
         socket.emit('server:attack', {user: data.user, by: data.by});
     });
-
-
     socket.on('keying', function (data) {
         socket.broadcast.emit('server:keying', {nick: data.nick, action: 'чё-то набирает...'})
     });
-
     socket.on('vote:post',function (data) {
         console.log(new Date() + ' ' + data.item);
         redis.lindex('addicted', data.index, function (err, reply) {
@@ -93,7 +124,6 @@ io.on('connection', function (socket) {
         });
 
     });
-
     socket.on('remove_post', function (data) {
         console.log(new Date() + ' Кто-то хочет удалить пост c индексом ' + data.index);
         let obj = {
@@ -110,7 +140,6 @@ io.on('connection', function (socket) {
             socket.emit('server:remove_post', {index: data.index});
         })
     });
-
     socket.on('mess', function (data) {
         const store = function () {
             data.mark = 0;
@@ -142,7 +171,6 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('s:mess', {data: data.data, nick: data.nick, date: data.date})
     }
 );
-
     socket.on('disconnect', function () {
         console.log(new Date() + ' Отвалился '+ socket.name);
         let index = users.indexOf(socket.name);

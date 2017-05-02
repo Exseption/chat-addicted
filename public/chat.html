@@ -20,7 +20,7 @@
                         <a class="btn"
                            ng-click="back()" style="cursor: pointer; text-decoration: none" ng-if="entered" ng-hide="backed">Загрузить предыдущие</a>
                     </div>
-                    <div ng-repeat="m in messages"  class="z-depth-1" style="background-color: white ">
+                    <div ng-repeat="m in messages"  class="z-depth-1 animate-repeat" style="background-color: white ">
                         <div>
                             <div class="white" style="padding: 5px 8px">
                                 <span><b>{{m.date}} </b></span><b>Пользователь </b><span class="link-this" ng-click="attack(m.nick)">{{m.nick}}</span><b> написал:</b>
@@ -28,9 +28,9 @@
                             <div style="padding: 10px 15px; margin: 10px; ">
                                 <div ng-bind-html="m.data | unsafe" ng-class="{'center-align': m.data.indexOf('<img src=') !== -1 || m.data.indexOf('<iframe') !== -1}"></div>
                                 <div class="right-align" ng-show="backed">
-                                    <span ng-click="remove_post(m, $index)" style="cursor: pointer"><a><i class="material-icons">delete</i> </a></span>
+                                    <span ng-click="remove_post(m, $index)" style="cursor: pointer"><a><i class="material-icons fix_icons_align">delete</i> </a></span>
                                     <span ng-click="vote(m, $index)" ng-show="backed" style="cursor: pointer; margin-left: 15px;" >
-                                <a><i class="material-icons">thumb_up</i><span ng-bind="m.mark"></span></a></span>
+                                <a><i class="material-icons fix_icons_align">thumb_up</i><span ng-bind="m.mark"></span></a></span>
                                 </div>
                             </div>
                         </div>
@@ -58,7 +58,7 @@
                 <div class="row">
                     <h5>История ников</h5>
                     <div class="row" style="padding: 15px 15px">
-                        <div ng-repeat="n in nicks" class="chip" ng-bind="n"></div>
+                        <div ng-repeat="n in nicks" class="chip animate-repeat" ng-bind="n"></div>
                     </div>
                 </div>
             </div>
