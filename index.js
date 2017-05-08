@@ -1,6 +1,8 @@
 const fs = require('fs');
-const redis = require('redis').createClient(3339, '50.30.35.9');
-redis.auth('brainsurgery','26c9c6f6ddb2a2ee1ad24355eaec3744');
+const redis = require('redis').createClient(3339, '50.30.35.9', { no_ready_check: true });
+redis.auth('26c9c6f6ddb2a2ee1ad24355eaec3744', function (err) {
+    if (err) throw err;
+});
 const express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),
