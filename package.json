@@ -1,10 +1,10 @@
 {
-  "name": "untitled4",
+  "name": "chat-addicted",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node app"
+    "start": "node index"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +22,7 @@
     "socket.io": "^1.7.3"
   },
   "engines": {
-    "node": "^",
-    "npm": "^"
+    "node": "^7.9.0",
+    "npm": "^4.2.0"
   }
 }
