@@ -1,5 +1,6 @@
 const fs = require('fs');
-const redis = require('redis').createClient();
+const redis = require('redis').createClient(3339, '50.30.35.9');
+redis.auth('brainsurgery','26c9c6f6ddb2a2ee1ad24355eaec3744');
 const express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),

@@ -148,8 +148,7 @@ angular.module('addicted', ['ngSanitize', 'ngCookies', 'ui.router', 'ngFileUploa
                     scope.entered = false;
                 });
                 socket.on('server:hello', function (users) {
-                    $('.tooltipped').tooltip({delay: 50});
-                    console.log(users);
+                     console.log(users);
                     scope.users = users.users;
                 });
                 scope.remove_post = function (post, index) {
