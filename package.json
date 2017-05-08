@@ -20,5 +20,9 @@
     "redis-connection": "^5.0.0",
     "redis-server": "^1.1.0",
     "socket.io": "^1.7.3"
+  },
+  "engines": {
+    "node": "^",
+    "npm": "^"
   }
 }
