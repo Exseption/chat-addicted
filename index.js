@@ -1,25 +1,13 @@
-const fs = require('fs');
-const redis = require('redis').createClient(3339, '50.30.35.9', { no_ready_check: true });
+var fs = require('fs');
+var redis = require('redis').createClient(3339, '50.30.35.9', { no_ready_check: true });
 redis.auth('26c9c6f6ddb2a2ee1ad24355eaec3744', function (err) {
     if (err) throw err;
 });
-const express = require('express'),
+var express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override');
-const multer = require('multer');
-const storage = multer.diskStorage({ //multers disk storage settings
-    destination: function (req, file, cb) {
-        cb(null, './uploads/')
-    },
-    filename: function (req, file, cb) {
-        let datetimestamp = Date.now();
-        cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
-    }
-});
-const upload = multer({ //multer settings
-        storage: storage
-        }).single('file');
+
 app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -28,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.disable('x-powered-by');
 app.use(function(req, res, next) {
-    const err = new Error('Not Found');
+    var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
@@ -42,20 +30,11 @@ app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.send(err);
 });
-const server = app.listen(8000);
-app.post('/upload', function(req, res) {
-    upload(req,res,function(err){
-        if(err){
-            res.json({error_code:1,err_desc:err});
-            return;
-        }
-        res.json({error_code:0,err_desc:null});
-    })
-});
-const io = require('socket.io')(server);
-let users = [];
+var server = app.listen(8000);
+var io = require('socket.io')(server);
+var users = [];
 io.on('connection', function (socket) {
-    let addr = socket.handshake.address;
+    var addr = socket.handshake.address;
     console.log(new Date() + ' Кто-то подключился к основному каналу! ' + addr.substring(addr.length - 13));
 
 
@@ -64,7 +43,7 @@ io.on('connection', function (socket) {
         redis.lrange('addicted', 0, -1, function (err, reply) {
             //console.log(reply);
             var _arr = [];
-            for(let i = 0; i < reply.length; i++){
+            for(var i = 0; i < reply.length; i++){
                 _arr.push(JSON.parse(reply[i]));
             }
             socket.json.emit('server:back', { listof: _arr});
@@ -76,7 +55,7 @@ io.on('connection', function (socket) {
             socket.emit('hello:error', {data: 'Такой ник уже занят'})
         } else {
             redis.lrange('nicks',0, -1, function (err, reply) {
-                let _arr = [];
+                var _arr = [];
                 for(var i = 0; i < reply.length; i++){
                     _arr.push(reply[i]);
                 }
@@ -94,8 +73,8 @@ io.on('connection', function (socket) {
             socket.json.emit('server:hello', {users: users});
             redis.lrange('addicted', -10, -1, function (err, reply) {
                 //console.log(reply);
-                let _arr = [];
-                for(let i = 0; i < reply.length; i++){
+                var _arr = [];
+                for(var i = 0; i < reply.length; i++){
                     _arr.push(JSON.parse(reply[i]));
                 }
                 socket.json.emit('server:stored-messages', {listof: _arr});
@@ -129,7 +108,7 @@ io.on('connection', function (socket) {
     });
     socket.on('remove_post', function (data) {
         console.log(new Date() + ' Кто-то хочет удалить пост c индексом ' + data.index);
-        let obj = {
+        var obj = {
             nick: data.nick,
             data: data.data,
             date: data.date,
@@ -144,26 +123,26 @@ io.on('connection', function (socket) {
         })
     });
     socket.on('mess', function (data) {
-        const store = function () {
+        var store = function () {
             data.mark = 0;
             return redis.rpush('addicted', JSON.stringify(data),function (err, reply) {
                 //console.log(reply)
             });
         };
-        let pic = data.data.substring(data.data.length - 3);
+        var pic = data.data.substring(data.data.length - 3);
         if ((pic === 'png') || (pic === 'bmp') || (pic === 'jpg') || (pic === 'gif') || (pic === 'peg')) {
             console.log(new Date() + ' Опа, картинка! ' + data.data);
-            let img = data.data;
+            var img = data.data;
             data.data = "<img src='" + img + "' class='img-responsive'/></img>";
             store();
         } else if (data.data.indexOf('www.youtube.com/watch') > -1) {
             console.log(new Date() + ' Наверно, ютюб! ' + data.data);
-            let video = data.data.replace("watch?v=", "/embed/");
+            var video = data.data.replace("watch?v=", "/embed/");
             data.data = "<div class='video-container'><iframe width='660' height='415' src='" + video + "' frameborder='0' allowfullscreen></iframe></div> ";
             store();
         } else if (data.data.indexOf('http') === 0) {
             console.log(new Date() + ' Ссылка! ' + data.data);
-            let link = data.data;
+            var link = data.data;
             data.data = "<a href='" + link + "'/>" + link +"</a>";
             store();
         } else {
@@ -176,7 +155,7 @@ io.on('connection', function (socket) {
 );
     socket.on('disconnect', function () {
         console.log(new Date() + ' Отвалился '+ socket.name);
-        let index = users.indexOf(socket.name);
+        var index = users.indexOf(socket.name);
         if(index > -1){
             users.splice(index,1);
             socket.json.emit('server:hello', {users: users});
